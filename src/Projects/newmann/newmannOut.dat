@@ -1,0 +1,93 @@
+[Main]
+nReportBlocks = 5;
+nDisplayBlocks = 1;
+displaySteps   = 1;     numero de passos para impressao no terminal
+outPressureSteps  = 10;  numero de passos para impressao das pressoes
+reportSteps  = 1;     numero de passos para impressao do relatorio
+outPressureFile = newmann;
+reportFile = newmann_report;
+
+[Display 1]
+row = 0;
+col = 0;
+p = 1;
+
+[Display 2]
+row = 2;
+col = 0;
+p = 1;
+
+[Report 1]
+row    = 0;
+col    = 0;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 2]
+row    = 0;
+col    = 5;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 3]
+row    = 0;
+col    = 10;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 4]
+row    = 0;
+col    = 15;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 5]
+row    = 0;
+col    = 20;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 6]
+row    = 250;
+col    = 250;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 7]
+row    = 300;
+col    = 300;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 8]
+row    = 350;
+col    = 350;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 9]
+row    = 400;
+col    = 400;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 10]
+row    = 450;
+col    = 450;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+
+#boolean:
+# True: 'y', 'Y', 't', 'T', '1'
+# False:'n', 'N', 'f', 'F', '0'

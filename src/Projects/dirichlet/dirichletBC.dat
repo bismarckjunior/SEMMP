@@ -1,0 +1,38 @@
+[Main]
+nboundary = 4;
+
+[Boundary 1]
+row = 0;
+col = 0;
+rowf = 49;
+colf = 0;
+type = PRESSURE;
+side = west;
+value = 6500;
+
+[Boundary 2]
+row = 0;
+col = 49;
+rowf = 49;
+colf = 49;
+type = PRESSURE;
+side = east;
+value = 6500;
+
+[Boundary 3]
+row = 0;
+col = 0;
+rowf = 0;
+colf = 49;
+type = PRESSURE;
+side = south;
+value = 6500;
+
+[Boundary 4]
+row = 49;
+col = 0;
+rowf = 49;
+colf = 49;
+type = PRESSURE;
+side = north;
+value = 6500;

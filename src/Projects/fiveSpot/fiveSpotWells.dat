@@ -1,0 +1,21 @@
+[Main]
+# wells for the five spot with periodic boundary conditions
+nwells = 2;
+
+[Well 1]
+row   = 10;
+col   = 10;
+rw    = 0.25;
+s     = 0.0;
+h     = 10.0;
+type  = RATE;
+qw    = -40.0;
+
+[Well 2]
+row   = 31;
+col   = 31;
+rw    = 0.25;
+s     = 0.0;
+h     = 10.0;
+type  = RATE
+qw    = 40.0;

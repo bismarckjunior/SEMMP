@@ -1,0 +1,35 @@
+[Main]
+nReportBlocks = 2;
+nDisplayBlocks = 2;
+displaySteps   = 1;     numero de passos para impressao no terminal
+#outPressureSteps  = 10;  numero de passos para impressao das pressoes
+reportSteps  = 1;     numero de passos para impressao do relatorio
+#outPressureFile = out_incompressible;
+reportFile = SPE_A1_2;
+np = 1;
+
+[Display 1]
+row = 4;
+col = 4;
+p = 1;
+qw = 1;
+
+[Display 2]
+row = 3;
+col = 9;
+p = 1;
+pwf = 1;
+
+[Report 1]
+row = 4;
+col = 4;
+p = T;
+qw = T;
+pwf = T; 
+
+[Report 2]
+row = 3;
+col = 9;
+p = 1;
+pwf = 1;
+qw = 1;

@@ -1,0 +1,11 @@
+[Main]
+nboundary = 1;
+
+[Boundary 1]
+row = 138;
+col = 37;
+rowf = 138;
+colf = 61;
+type = PRESSURE;
+side = north;
+value = 7500;

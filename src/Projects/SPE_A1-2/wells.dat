@@ -1,0 +1,20 @@
+[Main]
+nwells = 2;
+
+[Well 1]
+row   = 4;
+col   = 4;
+rw    = 0.25;
+s     = 0.0;
+h     = 40.0;
+type  = PRESSURE;
+pwf   = 5600.0;
+
+[Well 2]
+row   = 3;
+col   = 9;
+rw    = 0.25;
+s     = 0.0;
+h     = 15.0;
+type  = RATE;
+qw   = -650.0;

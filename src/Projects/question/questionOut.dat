@@ -1,0 +1,28 @@
+[Main]
+nReportBlocks = 1;
+nDisplayBlocks = 1;
+displaySteps   = 1;     numero de passos para impressao no terminal
+outPressureSteps  = 5;  numero de passos para impressao das pressoes
+reportSteps  = 3;     numero de passos para impressao do relatorio
+outPressureFile = interrogation;
+reportFile = interrogation_report;
+
+[Display 1]
+row = 11;
+col = 52;
+p = 1;
+pwf = 1;
+qw = 1;
+
+
+[Report 1]
+row    = 11;
+col    = 52;
+p      = 1;  boolean
+pwf    = 1;  boolean
+qw     = 1;  boolean
+
+
+#boolean:
+# True: 'y', 'Y', 't', 'T', '1'
+# False:'n', 'N', 'f', 'F', '0'
