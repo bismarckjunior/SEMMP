@@ -12,6 +12,10 @@
 *.dylib
 
 # Executables
-*.exe
+#*.exe
 *.out
 *.app
+
+# Microsoft Visual Studio C++ Files
+*.user
+*.sln
