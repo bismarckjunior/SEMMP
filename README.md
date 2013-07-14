@@ -1,7 +1,7 @@
 SEMMP
 =====
 
-SEMMP (from Portuguese "Simulador de Escoamento Monofásico em Meios Porosos") is a single-phase
+SEMMP ("Simulador de Escoamento Monofásico em Meios Porosos" in Portuguese) is a single-phase
  flow simulator in porous media.
 
 
