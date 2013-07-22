@@ -25,4 +25,4 @@
 Thumbs.db
 
 #Debug folder
-src/Debug/*
+*src/Debug/*
