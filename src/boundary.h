@@ -1,7 +1,20 @@
 #ifndef BOUNDARY_H
 #define BOUNDARY_H
 
-#include "boundary.h"
+#include "block.h"
+
+
+/* boundary conditions */
+#define PRESSURE_GRADIENT_ESPECIFIED  1 
+#define PRESSURE_ESPECIFIED	        2  //double definition (well.h)
+#define NORTH			'N'
+#define EAST			'E'
+#define WEST			'W'
+#define SOUTH			'S'
+
+/* bools */
+#define TRUE			1   
+#define FALSE			0
 
 typedef struct{
 	int row;		//row of first block or unique block 
@@ -13,6 +26,4 @@ typedef struct{
 	double value;	//value of boundary condition
 } Boundary;
 
-void setBoundaryConditions(int*, int*, double*, double*, double, 
-						   double, double, double, Boundary*, Block*);
 #endif

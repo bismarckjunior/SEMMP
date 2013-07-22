@@ -1,9 +1,61 @@
 #ifndef IOSEMMP_H
 #define IOSEMMP_H
 
+
+#include <stdio.h>
+#include <string.h>
+#include "eprintf.h"
 #include "well.h"
 #include "block.h"
 #include "parameters.h"
+#include "boundary.h"
+#include "memory.h"
+#include "iniparser.h"
+
+
+/* indexes for fluid properties tables */
+#define PRESS			0
+#define FVF				1
+#define INV_FVF			1	
+#define VISC			2
+#define INV_FVFVISC		2
+#define GAMMA			3
+#define NCOLPROPS		4
+
+
+/* default values */
+#define NONP			-1		 //do not print Np
+#define NOWELL			-1		 //block does not have a well
+#define ACTIVEBLOCK		+1		 //active block
+#define INVALIDBLOCK	 0		 //invalid enter
+#define INACTIVEBLOCK	-1		 //inactive block
+#define NOBOUNDARY		-1		 //block does not have boundary condition
+#define UNDEF       "**UNDEF**"  //file name not found
+//#define CALCULATEG      -1	     //flag to calculate G            
+#define ISBONDARY       -3		 //flag to verify if face is bondary
+#define NOTRANSMISSIBILITY -1
+
+#define ALPHAC			(double)5.614583
+
+
+/* strings length */
+#define SIDENAME		6		 //Side name: North, South, East, West
+#define LENGTHSN		20		 //section name length
+#define LENGTHFN		70		 //file name length
+#define LENGTHSP		25		 //section properties length
+#define LINESIZE		1313	 //0.0.2 max line size in report (MAXCOLREPORT)
+#define LENBCTYPE		30		 //boundary condition type
+#define LENWELLTYPE		20		 //see: /* well types */ 
+#define LENBLOCKTYPE	9		 //block type: ACTIVE, INACTIVE
+
+/*max column*/
+#define MAXCOLDISPLAY	5   
+#define MAXCOLREPORT	100  
+
+/* extensions for output files*/
+#define REPORTEXT		".txt"   //report extension
+#define OUTPRESSUREEXT	".vtk"   //output pressure extension
+
 
 
 /*ISEMMP**********************************************************************/
@@ -24,7 +76,10 @@ void readIniFile(int, char *[], Parameters *);
 Out *readAndSetOuts(Parameters*, Block*, int**, char*, double*);
 
 /*Reads main out and sets data*/
-void *readAndSetMainOut(Parameters*, double*);
+void readAndSetMainOut(Parameters*, double*);
+
+/*Reads well parameters file and sets data*/
+Well *readAndSetWellParameters(Parameters *);
 
 /*Reads and sets geometry*/
 Block *readAndSetGeometry(Parameters *, int **);

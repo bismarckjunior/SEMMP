@@ -1,15 +1,18 @@
 #ifndef WELL_H
 #define WELL_H
 
+#include <math.h>
+#include "eprintf.h"
+#include "block.h"
 #include "parameters.h"
 
 /* well types */
-//#define RATE_ESPECIFIED		1    
-//#define PRESSURE_ESPECIFIED	2	
-//#define DING				0.25 //Ding's constant for req
+#define RATE_ESPECIFIED		1    
+#define PRESSURE_ESPECIFIED	2	
+#define DING				0.25 //Ding's constant for req
 
-//#define PI				(double)3.14159265358979
-//#define BETAC			(double)1.127
+#define PI				(double)3.14159265358979
+#define BETAC			(double)1.127
 
 typedef struct {
 	int		row;	// row block
@@ -40,8 +43,6 @@ double reqDing(Block*, int, double);
 
 /*Abou Kassem & Aziz's well model*/
 double reqAbouKassemAziz(Block *, int);
-
-Well *readAndSetWellParameters(Parameters *);
 
 void setWells(Parameters *, Block *, int **, Well *);
 

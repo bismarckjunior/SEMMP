@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="C:\UMFBLAS\GotoBLAS\libgoto.lib C:\UMFBLAS\AMD\Lib\libamd.lib C:\UMFBLAS\UMFPACK\Lib\libumfpack.lib C:\iniparser\Lib\iniparser.lib"
+				AdditionalDependencies="C:\UMFBLAS\GotoBLAS\libgoto.lib C:\UMFBLAS\AMD\Lib\libamd.lib C:\UMFBLAS\UMFPACK\Lib\libumfpack.lib C:\iniparser\Lib\iniparser.lib ws2_32.lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -164,6 +164,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\boundary.c"
+				>
+			</File>
+			<File
 				RelativePath=".\dictionary.c"
 				>
 			</File>
@@ -172,7 +176,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\grid.c"
+				>
+			</File>
+			<File
 				RelativePath=".\iniparser.c"
+				>
+			</File>
+			<File
+				RelativePath=".\iosemmp.c"
+				>
+			</File>
+			<File
+				RelativePath=".\memory.c"
 				>
 			</File>
 			<File
@@ -180,7 +196,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\well.cpp"
+				RelativePath=".\well.c"
 				>
 			</File>
 		</Filter>
@@ -215,6 +231,10 @@
 			</File>
 			<File
 				RelativePath=".\iosimulator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\memory.h"
 				>
 			</File>
 			<File
