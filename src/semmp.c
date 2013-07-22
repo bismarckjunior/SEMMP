@@ -2085,7 +2085,6 @@ void modifyTransmissibilities(int **geom, Block *grid, Parameters *par){
 
 /*****************************************************************************/
 
-
 Boundary *readAndSetBoundaryConditions(Parameters *par, int **geom, Block *grid)
 {
 	Boundary *boundary;

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="SEMMP"
 	ProjectGUID="{92293260-DF52-45DC-ACFE-6D531313E2F6}"
 	RootNamespace="SEMMP"
@@ -179,6 +179,10 @@
 				RelativePath=".\semmp.c"
 				>
 			</File>
+			<File
+				RelativePath=".\well.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -186,7 +190,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\block.h"
+				>
+			</File>
+			<File
+				RelativePath=".\boundary.h"
+				>
+			</File>
+			<File
 				RelativePath=".\eprintf.h"
+				>
+			</File>
+			<File
+				RelativePath=".\grid.h"
 				>
 			</File>
 			<File
@@ -194,7 +210,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\iosemmp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\iosimulator.h"
+				>
+			</File>
+			<File
+				RelativePath=".\parameters.h"
+				>
+			</File>
+			<File
 				RelativePath=".\semmp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\well.h"
 				>
 			</File>
 		</Filter>
