@@ -1,6 +1,8 @@
 #include "iosemmp.h"
 
 
+
+
 double getTableVal(double **table, int colx, double x, int colfx, double delta,
 				   int rowmax)
 /* only for tables with equal step size in the independent variable, x */
@@ -21,11 +23,13 @@ double getTableVal(double **table, int colx, double x, int colfx, double delta,
 }
 /*****************************************************************************/
 
-void rTableFile(char filein[], double **table, int nrow, int ncol)
+template <class T>
+T** readTableFile(char filein[], int nrow, int ncol)
 {
 	float tmp;
 	int col, row;
 	FILE *mf;
+	T **table = rMatrix(nrow, ncol);
 		
 	if ( (mf = fopen(filein, "r")) == NULL ){
 		eprintf("opening table file %s:", filein);
@@ -35,53 +39,28 @@ void rTableFile(char filein[], double **table, int nrow, int ncol)
 		for (col = 0; col < ncol; col++) {
 			
 			fscanf(mf, "%f", &tmp);
-			table[row][col] = (double)tmp;
+			table[row][col] = (T)tmp;
 		}
 	}
 	fclose(mf);
 	
-	return;
+	return table;
 }
 /*****************************************************************************/
 
-void iTableFile(char filein[], int **table, int nrow, int ncol)
-{
-	float tmp;
-	int col, row;
-	FILE *mf;
-		
-	if ( (mf = fopen(filein, "r")) == NULL ){
-		eprintf("opening table file:");
-	}
-	
-	for (row = 0; row < nrow; row++) {
-		for (col = 0; col < ncol; col++) {
-			fscanf(mf, "%f", &tmp);
-			table[row][col] = (int)tmp;
-		}
-	}
-	fclose(mf);
-	
-	return;
-}
-/*****************************************************************************/
-
-double **readFluidProperties(Parameters *par)
-/* read the fluid properties from a file (pressure, Formation Volume Factor, 
-/* viscosity, especific gravity) and stores p, 1/FVF, 1/(FVF*mu) and gamma */
+double** readFluidProperties(Parameters* par)
 {
 	int i;
 	char dirFileName[LENGTHFN];
-	double **fluidProps;
+	double** fluidProps;
 	
 	setprogname("read fluid properties");
 
 	par->invBSC = 1.0; 
 
 	/* for pressure, formation-volume-factor, viscosity, especific gravity */
-	fluidProps = rMatrix(par->nfprop, NCOLPROPS);
 	sprintf(dirFileName, "%s%s", par->projectDir, par->fluidPropFile);
-	rTableFile(dirFileName, fluidProps, par->nfprop, NCOLPROPS);
+	fluidProps = readTableFile<double>(dirFileName, par->nfprop, NCOLPROPS);
 
 	for(i = 0; i < par->nfprop; i++){
 		fluidProps[i][INV_FVF] = 1.0 / fluidProps[i][FVF];
@@ -357,7 +336,7 @@ void readAndSetMainOut(Parameters *par, double *cumulativeProd)
 		mkdir(dirFileName);
 	}
 	else
-		strcpy(dirFileName, par->projectDir);
+		strcpy(dirFileName, par->projectDir); 
 		
 	sprintf(par->reportFile, "%s/%s%s", dirFileName, reportFile, REPORTEXT); 
 	sprintf(par->outPressureFile, "%s/%s", dirFileName, outPressureFile); 
@@ -816,57 +795,50 @@ Block *readAndSetGeometry(Parameters *par, int **geom)
 
 	/* temporary arrays for blocks properties */
 	if (isPhiFile = !atof(par->porosityFile)){
-		porositytmp = rMatrix(nrow, ncol); 
 		sprintf(dirFileName, "%s%s", par->projectDir, par->porosityFile);
-		rTableFile(dirFileName, porositytmp, nrow, ncol);
+		porositytmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
 	else {
 		phi = atof(par->porosityFile); 
 	}
 	if (isKxFile = !atof(par->kxFile)){
-		kxtmp = rMatrix(nrow, ncol);
 		sprintf(dirFileName, "%s%s", par->projectDir, par->kxFile);
-		rTableFile(dirFileName, kxtmp, nrow, ncol);
+		kxtmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
 	else {
 		kx = atof(par->kxFile);
 	}
 	if (isKyFile = !atof(par->kyFile)){
-		kytmp = rMatrix(nrow, ncol);
 		sprintf(dirFileName, "%s%s", par->projectDir, par->kyFile);
-		rTableFile(dirFileName, kytmp, nrow, ncol);
+		kytmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
 	else {
 		ky = atof(par->kyFile);
 	}
 	if (isDzFile = !atof(par->thicknessFile)){
-		thicknesstmp = rMatrix(nrow, ncol);
 		sprintf(dirFileName, "%s%s", par->projectDir, par->thicknessFile);
-		rTableFile(dirFileName, thicknesstmp, nrow, ncol);
+		thicknesstmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
 	else {
 		dz = atof(par->thicknessFile);
 	}
 	if (isZtopFile = !atof(par->zTopFile)){
-		zToptmp = rMatrix(nrow, ncol);
 		sprintf(dirFileName, "%s%s", par->projectDir, par->zTopFile);
-		rTableFile(dirFileName, zToptmp, nrow, ncol);
+		zToptmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
 	else {
 		ztop = atof(par->zTopFile);
 	}
 	if (isDxFile = !atof(par->dxFile)){
-		dxtmp = rMatrix(1, ncol);
 		sprintf(dirFileName, "%s%s", par->projectDir, par->dxFile);
-		rTableFile(dirFileName, dxtmp, 1, ncol);
+		dxtmp = readTableFile<double>(dirFileName, 1, ncol);
 	}
 	else {
 		dx = atof(par->dxFile);
 	}
 	if (isDyFile = !atof(par->dyFile)){
-		dytmp = rMatrix(nrow, 1);
 		sprintf(dirFileName, "%s%s", par->projectDir, par->dyFile);
-		rTableFile(dirFileName, dytmp, nrow, 1);
+		dytmp = readTableFile<double>(dirFileName, nrow, 1);
 	}
 	else {
 		dy = atof(par->dyFile);
@@ -1012,40 +984,8 @@ Well *readAndSetWellParameters(Parameters *par)
 	if (!wells) eprintf("allocation failure for wells struct:");
 
 	for(i = 0; i < par->nwells; i++){
-		itoa(i+1, num, 10);  
-		sprintf(SectionName, "well %s:", num);
 		
-		sprintf(str, "%s%s", SectionName, "qw");
-		wells[i].qw = iniparser_getdouble(ini, str, 0);
-
-		sprintf(str, "%s%s", SectionName, "pwf");
-		wells[i].pwf = iniparser_getdouble(ini, str, 0);
-	
-		sprintf(str, "%s%s", SectionName, "type");
-		strcpy(type, _strupr(iniparser_getstring(ini, str, NULL)));  
-
-		sprintf(str, "%s%s", SectionName, "row");
-		wells[i].row = iniparser_getint(ini, str, -1);
-
-		sprintf(str, "%s%s", SectionName, "col");
-		wells[i].col = iniparser_getint(ini, str, -1);
-		
-		sprintf(str, "%s%s", SectionName, "dx");
-		wells[i].dx = iniparser_getdouble(ini, str, 0); 
-
-		sprintf(str, "%s%s", SectionName, "dy");
-		wells[i].dy = iniparser_getdouble(ini, str, 0); 
-
-		sprintf(str, "%s%s", SectionName, "rw");
-		wells[i].rw = iniparser_getdouble(ini, str, -1);
-
-		sprintf(str, "%s%s", SectionName, "h");
-		wells[i].h  = iniparser_getdouble(ini, str, -1);
-
-		sprintf(str, "%s%s", SectionName, "s");
-		wells[i].s  = iniparser_getdouble(ini, str, 0);
-
-		wells[i].np = 0; 
+		wells[i] = Well(ini, i+1);
 
 		if(wells[i].row < 0 || wells[i].row >= par->nrow){ 
 			eprintf("row in [Well %i] outside of reservoir geometry", i+1); 
@@ -1054,14 +994,6 @@ Well *readAndSetWellParameters(Parameters *par)
 		if(wells[i].col < 0 || wells[i].col >= par->ncol){
 			eprintf("col in [Well %i] outside of reservoir geometry", i+1);
 		}
-		
-		if (strcmp(type, "RATE_ESPECIFIED") == 0 ||	strcmp(type, "RATE") == 0)
-			wells[i].type = RATE_ESPECIFIED;
-		else if (strcmp(type, "PRESSURE_ESPECIFIED") == 0 ||
-			     strcmp(type, "PRESSURE") == 0)
-			wells[i].type = PRESSURE_ESPECIFIED;			
-		else
-			eprintf("type in [Well %i] is invalid", i+1);
 	}
 	
 	iniparser_freedict(ini);
@@ -1071,6 +1003,14 @@ Well *readAndSetWellParameters(Parameters *par)
 	return wells;
 }
 /*****************************************************************************/
+
+
+
+
+
+
+
+
 
 
 

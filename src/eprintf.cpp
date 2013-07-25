@@ -28,7 +28,7 @@ void eprintf(char *fmt, ...)
 	if (fmt[0] != '\0' && fmt[strlen(fmt)-1] == ':')
 		fprintf(stderr, " %s", strerror(errno));
 	fprintf(stderr, "\n");
-	exit(2); /* conventional value for failed execution */
+	exit(2);  /* conventional value for failed execution */
 }
 
 /* weprintf: print warning message */

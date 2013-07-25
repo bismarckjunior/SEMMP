@@ -76,7 +76,7 @@ int main (int argc, char *argv[])
 
 	grid  = readAndSetGeometry(&par, geom);
 
-	boundary = readAndSetBoundaryConditions(&par, geom, grid);
+	boundary = readAndSetBoundaryConditions(&par, geom, grid); 
 
 	if (!par.isCylindrical) setWells(&par, grid, geom, wells);
 

@@ -170,7 +170,7 @@ void setTransmissibilityMatrix(Parameters *par, Block *grid, Well *wells,
 				j++;
 			}
 		}
-		else 
+		else  
 			setBoundaryConditions(&j, Map, Ax, &b[i], N, E, W, S, boundary, 
 								  &grid[i]);
 	}
@@ -203,7 +203,7 @@ void setCylindricalTransmissibilities(Parameters *par, Block *grid, Boundary
 	if (!atof(par->dxFile)){
 		drtmp = rMatrix(1, par->ncol);
 		sprintf(drFileName, "%s%s", par->projectDir, par->dxFile);
-		rTableFile(drFileName, drtmp, 1, par->ncol);
+		//readTableFile(drFileName, drtmp, 1, par->ncol);
 	}
 	else printf("Error!");
 
@@ -526,6 +526,56 @@ void setInitialPressure(Parameters *par, Block *grid, Well *wells,
 	return;
 }
 /*****************************************************************************/
+
+
+void setWells(Parameters *par, Block *grid, int **geom, Well *wells)
+{
+	int i, localIndex;
+	double req, kH, offsetx, offsety;
+
+	setprogname("well parameters");
+
+	/****** wells ******/
+	for(i = 0; i < par->nwells; i++){
+		localIndex = (geom[wells[i].row][wells[i].col] - 1);
+		grid[localIndex].isWellBlock = i;
+		
+		offsetx = fabs(wells[i].dx)/grid[localIndex].dx;
+		offsety = fabs(wells[i].dy)/grid[localIndex].dy; 
+
+		/* tolerance 1% - interior well block */
+		if(offsetx < 0.01 && offsety < 0.01
+			&& grid[localIndex].E != grid[localIndex].H
+			&& grid[localIndex].W != grid[localIndex].H
+			&& grid[localIndex].N != grid[localIndex].H
+			&& grid[localIndex].S != grid[localIndex].H){
+
+			req = wells[i].reqPeaceman(grid[localIndex]);
+			//req = 0.14*sqrt(pow(grid[localIndex].dx,2.0)+pow(grid[localIndex].dy,2.0));
+			//req = reqDing(grid, localIndex, req);
+		}
+		else if(grid[localIndex].N != grid[localIndex].S 
+			&&  grid[localIndex].E != grid[localIndex].W) {
+			
+			req = wells[i].reqAbouKassemAziz(grid, localIndex);
+		}
+		else{
+			weprintf("\n\nWARNING????? Well model??\n\n");
+		}
+
+		kH = sqrt(grid[localIndex].kx * grid[localIndex].ky);
+
+		wells[i].gw = (2.0*PI*BETAC*kH*wells[i].h) 
+			/ (log(req/wells[i].rw) + wells[i].s);
+	}
+
+	unsetprogname();
+	
+	return;
+} 
+/*****************************************************************************/ 
+
+
 
 double normDelta(double *a, double *b, int n)
 {

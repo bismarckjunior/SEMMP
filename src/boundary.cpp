@@ -1,4 +1,4 @@
-#include "boundary.h"
+#include "boundary.h" 
 
 void setBoundaryConditions(int *j, int *Map, double *Ax, double *b, 
 									 double N, double E, double W, double S, 

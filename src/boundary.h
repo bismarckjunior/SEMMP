@@ -2,6 +2,7 @@
 #define BOUNDARY_H
 
 #include "block.h"
+#include "eprintf.h"
 
 
 /* boundary conditions */
@@ -26,4 +27,8 @@ typedef struct{
 	double value;	//value of boundary condition
 } Boundary;
 
+
+void setBoundaryConditions(int *j, int *Map, double *Ax, double *b, 
+									 double N, double E, double W, double S, 
+									 Boundary* boundary, Block *block);
 #endif

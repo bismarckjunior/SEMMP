@@ -2,6 +2,7 @@
 #define MEMORY_H
 
 #include <malloc.h>
+#include "eprintf.h"
 
 /******* memory allocation utilities ********/
 int *iVector(int);

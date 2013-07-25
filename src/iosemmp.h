@@ -3,14 +3,19 @@
 
 
 #include <stdio.h>
-#include <string.h>
+#include <string>
+#include <sstream>
 #include "eprintf.h"
 #include "well.h"
 #include "block.h"
 #include "parameters.h"
 #include "boundary.h"
 #include "memory.h"
-#include "iniparser.h"
+#include <direct.h> //mkdir function
+extern "C" {
+#include <iniparser.h> 
+} 
+
 
 
 /* indexes for fluid properties tables */
@@ -59,15 +64,24 @@
 
 
 /*ISEMMP**********************************************************************/
+
+//char *createKey(std::string k, int num, std::string secName);
+
+
 /*Gets table value
  * only for tables with equal step size in the independent variable: x*/
 double getTableVal(double **, int, double, int, double, int);
 
-/*Read table of double from a file*/
-void rTableFile(char [], double **, int, int);
 
-/*Read table of integer from a file*/
-void iTableFile(char [], int **, int, int);
+/** 
+ * Read table from a file.
+ * @param filein filename
+ * @param nrow number of rows
+ * @param ncol number of columms
+ * @return table table read
+ */
+template <class T>
+T **readTableFile(char filein[], int nrow, int ncol);
 
 /*Reads a list of parameters from a inifile*/
 void readIniFile(int, char *[], Parameters *);

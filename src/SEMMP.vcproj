@@ -164,39 +164,31 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\boundary.c"
+				RelativePath=".\boundary.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\dictionary.c"
+				RelativePath=".\eprintf.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\eprintf.c"
+				RelativePath=".\grid.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\grid.c"
+				RelativePath=".\iosemmp.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\iniparser.c"
+				RelativePath=".\memory.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\iosemmp.c"
+				RelativePath=".\semmp.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\memory.c"
-				>
-			</File>
-			<File
-				RelativePath=".\semmp.c"
-				>
-			</File>
-			<File
-				RelativePath=".\well.c"
+				RelativePath=".\well.cpp"
 				>
 			</File>
 		</Filter>
@@ -222,15 +214,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\iniparser.h"
-				>
-			</File>
-			<File
 				RelativePath=".\iosemmp.h"
-				>
-			</File>
-			<File
-				RelativePath=".\iosimulator.h"
 				>
 			</File>
 			<File
