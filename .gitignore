@@ -20,9 +20,10 @@
 *.user
 *.sln
 *.ncb
+*.suo
 
 #Thumbs
 Thumbs.db
 
 #Degub folder
-*src/Debug/*
+src/Debug/
