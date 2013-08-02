@@ -192,6 +192,7 @@ typedef struct{
 /******* memory allocation utilities ********/
 int *iVector(int);
 int **iMatrix(int, int);
+int ***iMatrix3D(int, int, int);
 void freeiVector(int *);
 void freeiMatrix(int **, int, int);
 double *rVector(int);

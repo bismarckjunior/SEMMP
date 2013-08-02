@@ -56,7 +56,7 @@ int main (int argc, char *argv[])
 	double Control[UMFPACK_CONTROL], Info[UMFPACK_INFO];
 	void *Symbolic, *Numeric ;
 	int status;
-	int **geom; /* temporary array for geometry */
+	int ***geom; /* temporary cube for geometry */
 	Block *grid;
 	Well *wells;
 	Parameters par;
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
 	
 	header(stdout, &par); 
 	
-	geom  = iMatrix(par.nrow, par.ncol, par.nlay);
+	geom  = iMatrix3D(par.nrow, par.ncol, par.nlay);
 
 	wells = readAndSetWellParameters(&par);
 
@@ -314,6 +314,30 @@ int **iMatrix(int rows, int cols)
 }
 /*****************************************************************************/
 
+int **iMatrix3D(int rows, int cols, int lays)
+{
+	int i, j;
+	int ***m;
+	
+	m = (int ***)calloc(rows, sizeof(int **));
+	if (!m) 
+		eprintf("allocation failure 1 in imatrix():");
+	
+	for (i = 0; i < rows; i++) {
+		m[i] = (int **)calloc(cols, sizeof(int *));
+		if (!m[i]) 
+			eprintf("allocation failure 2 in imatrix():");
+		
+		for (j = 0; j < cols; j++) {
+			m[i][j] = (int *)calloc(lays, sizeof(int));
+			if (!m[i][j]) 
+				eprintf("allocation failure 3 in imatrix():");
+		}
+	}
+	
+	return m;
+}
+/*****************************************************************************/
 
 
 void freeiVector(int *v)
@@ -1339,6 +1363,9 @@ Well *readAndSetWellParameters(Parameters *par)
 
 		sprintf(str, "%s%s", SectionName, "col");
 		wells[i].col = iniparser_getint(ini, str, -1);
+
+		sprintf(str, "%s%s", SectionName, "lay");
+		wells[i].lay = iniparser_getint(ini, str, 1);
 		
 		sprintf(str, "%s%s", SectionName, "dx");
 		wells[i].dx = iniparser_getdouble(ini, str, 0); 
