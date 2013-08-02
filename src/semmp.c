@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
 	
 	header(stdout, &par); 
 	
-	geom  = iMatrix(par.nrow, par.ncol);
+	geom  = iMatrix(par.nrow, par.ncol, par.nlay);
 
 	wells = readAndSetWellParameters(&par);
 
@@ -314,6 +314,8 @@ int **iMatrix(int rows, int cols)
 }
 /*****************************************************************************/
 
+
+
 void freeiVector(int *v)
 {
 	free(v);
@@ -403,7 +405,7 @@ void iTableFile(char filein[], int **table, int nrow, int ncol)
 
 Block *readAndSetGeometry(Parameters *par, int **geom)
 {
-	int nrow, ncol, col, row, localIndex, aux, i = 0, j = 0;
+	int nrow, ncol, nlay, col, row, lay, localIndex, aux, i = 0, j = 0, k = 0;
 	int isGeoFile, isPhiFile, rowf, colf, line = 0;
 	int isKxFile, isKyFile, isDxFile, isDyFile, isDzFile, isZtopFile;
 	double phi, kx, ky, dx, dy, dz, ztop; 
@@ -417,6 +419,7 @@ Block *readAndSetGeometry(Parameters *par, int **geom)
 	
 	nrow = par->nrow;
 	ncol = par->ncol;
+	nlay = par->nlay;
 	par->nBlocks = 0;	
 
 	isGeoFile = (strcmp(par->geometryFile, "full") != 0); 
@@ -1211,6 +1214,7 @@ the simulation parameters structure */
 	par->nSteps  = iniparser_getint(ini, "control:maxsteps", -1);
 	par->ncol = iniparser_getint(ini, "reservoir description:ncol", -1);
 	par->nrow = iniparser_getint(ini, "reservoir description:nrow", -1);
+	par->nlay = iniparser_getint(ini, "reservoir description:nlay", 1);
 	par->cf   = iniparser_getdouble(ini, "reservoir description:cf", -1);
 	par->cphi = iniparser_getdouble(ini, "reservoir description:cr", -1);
 	par->p0   = iniparser_getdouble(ini, "reservoir description:refpres", -1);
@@ -1576,6 +1580,7 @@ void header(FILE *file, Parameters *par)
 	fprintf(file, "\n\n\
   nrow:                [%d]\n\
   ncol:                [%d]\n\
+  nlay:                [%d]\n\
   initialTime:         [%g]\n\
   maxSteps:            [%d]\n\
   dt:                  [%g]\n\
@@ -1601,7 +1606,7 @@ void header(FILE *file, Parameters *par)
   output file:         [%s]\n\
   boundary file:       [%s]\n\n\
   ----------------------------------------------------------------------------\n", 
-		par->nrow, par->ncol, par->iniTime, par->nSteps, par->dt, par->cf, 
+		par->nrow, par->ncol, par->nlay, par->iniTime, par->nSteps, par->dt, par->cf, 
 		par->cphi, par->geometryFile, par->modifiedBlocksFile, 
 		par->modTransmissibilityFile,par->porosityFile, 
 		par->kxFile, par->kyFile, par->thicknessFile, par->zTopFile, 

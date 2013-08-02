@@ -23,3 +23,7 @@
 
 #Thumbs
 Thumbs.db
+
+#Degub folder
+src/Debug/
+
