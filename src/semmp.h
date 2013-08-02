@@ -79,6 +79,7 @@ typedef struct {
 	int dtLogScale;
 	int ncol;
 	int nrow;
+	int nlay;
 	int nSteps;
 	int outPressureSteps;   // steps for print pressures in outPressureFile
 	int nBlocks;
@@ -143,11 +144,14 @@ typedef struct {
 	int W; /* West */
 	int N; /* North */
 	int S; /* South */
+	int A; /* Above */
+	int B; /* Below */
 } Block;
 
 typedef struct {
 	int		row;
-	int		col;
+	int		col;	// column
+	int		lay;	// layer
 	int		type;	// pressure or flow rated specified
 	double	dx;		// x distance to the block's SW corner
 	double	dy;		// y distance to the block's SW corner
@@ -162,7 +166,8 @@ typedef struct {
 
 typedef struct {
 	int row;
-	int col;
+	int col;		// column
+	int lay;		// layer
 	int p;			// bool for display pressure
 	int qw;			// bool for display flow rate
 	int np;			// cumulative oil production	
@@ -173,8 +178,10 @@ typedef struct {
 typedef struct{
 	int row;		//row of first block or unique block 
 	int col;		//col of first block or unique block 
+	int lay;		//layer of first block or unique block 
 	int rowf;		//row of last block 
-	int colf;		//col of last block
+	int colf;		//column of last block
+	int layf;		//layer of last block
 	int type;		//type of boundary condition
 	char side;      //side: NORTH, EAST, SOUTH, WEST
 	double value;	//value of boundary condition
