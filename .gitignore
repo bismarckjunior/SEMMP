@@ -21,9 +21,14 @@
 *.sln
 *.ncb
 *.suo
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.idb
 
-# Thumbs
+#Thumbs
 Thumbs.db
 
-# Debug folder
-*src/Debug/*
+#Degub folder
+src/Debug/
