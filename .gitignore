@@ -20,10 +20,15 @@
 *.user
 *.sln
 *.ncb
+*.suo
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.idb
 
 #Thumbs
 Thumbs.db
 
 #Degub folder
 src/Debug/
-
