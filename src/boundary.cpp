@@ -1,13 +1,14 @@
 #include "boundary.h" 
 
-void setBoundaryConditions(int *j, int *Map, double *Ax, double *b, 
-									 double N, double E, double W, double S, 
-									 Boundary* boundary, Block *block)
+void setBoundaryConditions(int *j, int *Map, double *Ax, double *b, double N, 
+						   double E, double W, double S, double A, double B,
+						   Boundary* boundary, Block *block)
 {
-	int bool_E, bool_W, bool_N, bool_S, i, k, m, tmp;
+	bool bool_E, bool_W, bool_N, bool_S, bool_A, bool_B;
+	int i, k, m, tmp;
 	int diag_index = *j;
 
-	bool_E = bool_W = bool_N = bool_S = TRUE;
+	bool_E = bool_W = bool_N = bool_S = bool_A = bool_B = TRUE;
 	
 	setprogname("boundary conditions");
 
@@ -101,6 +102,14 @@ void setBoundaryConditions(int *j, int *Map, double *Ax, double *b,
 	}
 	if(S > 0.0 && bool_S == TRUE){
 		Ax[Map[*j]] = S;
+		(*j)++;
+	}
+	if(A > 0.0 && bool_A == TRUE){
+		Ax[Map[*j]] = A;
+		(*j)++;
+	}
+	if(B > 0.0 && bool_B == TRUE){
+		Ax[Map[*j]] = B;
 		(*j)++;
 	}
 

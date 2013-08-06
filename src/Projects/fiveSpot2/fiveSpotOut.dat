@@ -1,0 +1,40 @@
+[Main]
+nReportBlocks = 2;
+nDisplayBlocks = 2;
+displaySteps   = 1;     numero de passos para impressao no terminal
+outPressureSteps  = 1;  numero de passos para impressao das pressoes
+reportSteps  = 1;     numero de passos para impressao do relatorio
+outPressureFile = fiveSpot;
+reportFile = fiveSpot_report;
+
+[Display 1]
+row = 10;
+col = 10;
+p = 1;
+pwf = 1;
+qw = 0;
+
+[Display 2]
+row = 31;
+col = 31;
+p = 1;
+pwf = 1;
+qw = 0;
+
+[Report 1]
+row    = 10;
+col    = 10;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+[Report 2]
+row    = 31;
+col    = 31;
+p      = 1;  boolean
+pwf    = 1;  boolean
+#qw     = 0;  boolean
+
+#boolean:
+# True: 'y', 'Y', 't', 'T', '1'
+# False:'n', 'N', 'f', 'F', '0'

@@ -30,7 +30,7 @@ void setCartesianTransmissibilities(Parameters *, Block *, Boundary *);
 void setCylindricalTransmissibilities(Parameters *, Block *, Boundary *, 
 									  Well *);
 
-void setWells(Parameters *, Block *, int **, Well *);
+void setWells(Parameters *, Block *, int ***, Well *);
 
 double normDelta(double *, double *, int );
 

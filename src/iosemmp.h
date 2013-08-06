@@ -13,7 +13,7 @@
 #include "memory.h"
 #include <direct.h> //mkdir function
 extern "C" {
-#include <iniparser.h> 
+#include <iniparser.h>
 } 
 
 
@@ -37,7 +37,7 @@ extern "C" {
 #define NOBOUNDARY		-1		 //block does not have boundary condition
 #define UNDEF       "**UNDEF**"  //file name not found
 //#define CALCULATEG      -1	     //flag to calculate G            
-#define ISBONDARY       -3		 //flag to verify if face is bondary
+#define ISBOUNDARY       -3		 //flag to verify if face is bondary
 #define NOTRANSMISSIBILITY -1
 
 #define ALPHAC			(double)5.614583
@@ -87,26 +87,26 @@ T **readTableFile(char filein[], int nrow, int ncol);
 void readIniFile(int, char *[], Parameters *);
 
 /*Reads outputFile and sets data*/
-Out *readAndSetOuts(Parameters*, Block*, int**, char*, double*);
+Out *readAndSetOuts(Parameters *, Block *, int ***, char *, double *);
 
 /*Reads main out and sets data*/
-void readAndSetMainOut(Parameters*, double*);
+void readAndSetMainOut(Parameters *, double *);
 
 /*Reads well parameters file and sets data*/
 Well *readAndSetWellParameters(Parameters *);
 
 /*Reads and sets geometry*/
-Block *readAndSetGeometry(Parameters *, int **);
+Block *readAndSetGeometry(Parameters *, int ***);
 
 /*Reads the fluid properties from a file (pressure, Formation Volume Factor, 
  *viscosity, especific gravity) and stores p, 1/FVF, 1/(FVF*mu) and gamma */
 double **readFluidProperties(Parameters *);
 
 /*Reads boundary conditions file and sets data*/
-Boundary *readAndSetBoundaryConditions(Parameters*, int**, Block*);
+Boundary *readAndSetBoundaryConditions(Parameters*, int ***, Block*);
 
 /*Modifies block to ACTIVE or INACTIVE*/
-void modifyGeometry(int**, Parameters*);
+void modifyGeometry(bool***, Parameters*);
 
 /*Modifies transmissibilities from a file*/
 void modifyTransmissibilities(int **, Block *, Parameters *);

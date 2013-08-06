@@ -16,5 +16,12 @@ void freerMatrix(double **, int, int);
 /********************************************/
 
 
+template <class T>
+int*** array3D(int , int , int );
+
+
+
+///template <class T>
+void freeArray(int***, int rows, int cols, int lays);
 
 #endif

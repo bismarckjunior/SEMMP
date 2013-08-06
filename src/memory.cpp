@@ -56,6 +56,45 @@ int **iMatrix(int rows, int cols)
 }
 /*****************************************************************************/
 
+int*** array3D(int rows, int cols, int lays)
+{
+	int*** m = new int**[rows];
+
+	if (!m) 
+		eprintf("allocation failure 1 in array3D():");
+	
+	for (int i=0; i < rows; i++) {
+		m[i] = new int*[cols];
+		if (!m[i]) 
+			eprintf("allocation failure 2 in array3D():");
+
+		for (int j=0; j < cols; j++){
+			m[i][j] = new int[lays];
+
+			if (!m[i][j]) 
+				eprintf("allocation failure 3 in array3D():");
+			
+			for (int k=0; k < lays; k++)
+				m[i][j][k] = 0;
+		}
+	}
+
+	return m;
+}
+/*****************************************************************************/
+
+//template <class T>
+void freeArray(int*** array3D, int rows, int cols, int lays)
+{
+	for (int i = 0; i < rows; i++){
+		for (int j = 0; j < cols; j++)
+			delete [] array3D[i][j];
+		delete [] array3D[i];
+	}
+	delete [] array3D;
+}
+/*****************************************************************************/
+
 void freeiVector(int *v)
 {
 	free(v);

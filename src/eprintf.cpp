@@ -80,7 +80,7 @@ char *estrdup(char *s)
 	if (t == NULL)
 		eprintf("estrdup(\"%.20s\") failed:", s);
 	strcpy(t, s);
-	return t;
+	return t; 
 }
 
 /* progname: return stored name of program */

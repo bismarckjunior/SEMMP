@@ -1,0 +1,98 @@
+   =========================================================================  
+
+                    SINGLE PHASE - SLIGHTLY-COMPRESSIBLE-FLOW                 
+       CARTESIAN (variable depth/variable thickness) - FINITE DIFFERENCE      
+                              BLOCK CENTERED GRID                             
+                              SIMULATOR Ver. 0.0.3                            
+
+                              capico@lenep.uenf.br                            
+                           bismarckjunior@outlook.com                         
+
+   =========================================================================  
+
+     Project Name: 3D.ini 
+
+  nrow:                [2]
+  ncol:                [2]
+  nlay:                [1]
+  initialTime:         [0]
+  maxSteps:            [50]
+  dt:                  [0.001]
+  cf:                  [9e-006]
+  cphi:                [3e-006]
+  geometry:            [full]
+  modGeom:             [**UNDEF**]
+  modTransmissibility: [**UNDEF**]
+  porosity:            [0.2]
+  kx:                  [10]
+  ky:                  [10]
+  zTop:                [5.0]
+  dx:                  [100]
+  dy:                  [100]
+  dz:                  [100]
+  rhoSC:               [52.4]
+  fproprows:           [8]
+  dpprops:             [500]
+  props file:          [fluidprop.dat]
+  p0:                  [7500]
+  z0:                  [10]
+  wells file:          [3dWells.dat]
+  output file:         [3dOuts.dat]
+  boundary file:       [**UNDEF**]
+
+  ----------------------------------------------------------------------------
+
+-----------
+  Time[Day]  
+-----------
+ 0.000E+000 
+ 1.000E-003 
+ 2.000E-003 
+ 3.000E-003 
+ 4.000E-003 
+ 5.000E-003 
+ 6.000E-003 
+ 7.000E-003 
+ 8.000E-003 
+ 9.000E-003 
+ 1.000E-002 
+ 1.100E-002 
+ 1.200E-002 
+ 1.300E-002 
+ 1.400E-002 
+ 1.500E-002 
+ 1.600E-002 
+ 1.700E-002 
+ 1.800E-002 
+ 1.900E-002 
+ 2.000E-002 
+ 2.100E-002 
+ 2.200E-002 
+ 2.300E-002 
+ 2.400E-002 
+ 2.500E-002 
+ 2.600E-002 
+ 2.700E-002 
+ 2.800E-002 
+ 2.900E-002 
+ 3.000E-002 
+ 3.100E-002 
+ 3.200E-002 
+ 3.300E-002 
+ 3.400E-002 
+ 3.500E-002 
+ 3.600E-002 
+ 3.700E-002 
+ 3.800E-002 
+ 3.900E-002 
+ 4.000E-002 
+ 4.100E-002 
+ 4.200E-002 
+ 4.300E-002 
+ 4.400E-002 
+ 4.500E-002 
+ 4.600E-002 
+ 4.700E-002 
+ 4.800E-002 
+ 4.900E-002 
+ 5.000E-002 

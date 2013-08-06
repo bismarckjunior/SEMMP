@@ -16,8 +16,10 @@ typedef struct {
 	double dtMultiplier;	//time step multiplier
 	
 	int dtLogScale;			//bool for log scale in time
+	int nDimensions;		//number of dimensions (2D, 3D)
 	int ncol;				//number of columns
 	int nrow;				//number of rows
+	int nlay;				//number of layers
 	int nSteps;				//number of steps
 	int outPressureSteps;   //steps for print pressures in outPressureFile
 	int nBlocks;			//number of blocks
@@ -42,10 +44,11 @@ typedef struct {
 	char porosityFile[LENGTHFN];		//porosity file
 	char kxFile[LENGTHFN];				//kx file
 	char kyFile[LENGTHFN];				//ky file
-	char thicknessFile[LENGTHFN];		//thickness file
+	char kzFile[LENGTHFN];				//kz file
 	char zTopFile[LENGTHFN];			//block top depth file
 	char dxFile[LENGTHFN];				//dx file
 	char dyFile[LENGTHFN];				//dy file
+	char dzFile[LENGTHFN];				//thickness file
 	char fluidPropFile[LENGTHFN];		//fluid properties file
 	char wellsFile[LENGTHFN];			//wells file
 	char outputFile[LENGTHFN];			//output file

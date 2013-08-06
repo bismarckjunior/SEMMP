@@ -6,7 +6,7 @@ char *key(std::string k, int num)
 	char key[LENGTHSP];
 
 	key_tmp << "well "<< num << ":" << k;
-	strcpy(key, key_tmp.str().c_str());
+	strcpy_s(key, key_tmp.str().c_str());
 
 	return key;
 }
@@ -15,25 +15,16 @@ char *key(std::string k, int num)
 Well::Well(dictionary *ini, int num)
 {
 	row = iniparser_getint(ini, key("row", num), -1);
-
 	col = iniparser_getint(ini, key("col", num), -1);
-
+	lay = iniparser_getint(ini, key("lay", num), 0);
 	dx = iniparser_getdouble(ini, key("dx", num), 0); 
-
 	dy = iniparser_getdouble(ini, key("dy", num), 0); 
-
 	rw = iniparser_getdouble(ini, key("rw", num), -1);
-
 	h  = iniparser_getdouble(ini, key("h", num), -1);
-
 	s  = iniparser_getdouble(ini, key("s", num), 0);
-
 	pwf = iniparser_getdouble(ini, key("pwf", num), 0);
-
 	qw = iniparser_getdouble(ini, key("qw", num), 0);
-
 	std::string type_ (iniparser_getstring(ini, key("type", num), NULL));  
-
 	np = 0; 
 
 	if (type_ == "RATE_ESPECIFIED" == 0 ||	type_ == "RATE")

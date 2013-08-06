@@ -56,7 +56,7 @@ int main (int argc, char *argv[])
 	double Control[UMFPACK_CONTROL], Info[UMFPACK_INFO];
 	void *Symbolic, *Numeric ;
 	int status;
-	int **geom; /* temporary array for geometry */
+	int ***geom; /* temporary array for geometry */
 	Block *grid;
 	Well *wells;
 	Parameters par;
@@ -70,7 +70,7 @@ int main (int argc, char *argv[])
 	
 	header(stdout, &par); 
 	
-	geom  = iMatrix(par.nrow, par.ncol);
+	geom  = array3D<int>(par.nlay, par.nrow, par.ncol);
 
 	wells = readAndSetWellParameters(&par);
 
@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
 
 	display = readAndSetOuts(&par, grid, geom, "display", &cumulativeProd);
 
-	freeiMatrix(geom, par.nrow, par.ncol);
+	freeArray(geom, par.nlay, par.nrow, par.ncol);
 
 	if (par.isCylindrical) //0.0.3
 		setCylindricalTransmissibilities(&par, grid, boundary, wells);

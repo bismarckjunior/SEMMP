@@ -36,6 +36,18 @@ void setMatrixStructure(Parameters *par, Block *grid, int *Ti, int *Tj,
 			Tx[j] = grid[i].S;
 			j++;
 		}
+		if(grid[i].A != grid[i].H){
+			Ti[j] = i;
+			Tj[j] = grid[i].A;
+			Tx[j] = grid[i].A;
+			j++;
+		}
+		if(grid[i].B != grid[i].H){
+			Ti[j] = i;
+			Tj[j] = grid[i].B;
+			Tx[j] = grid[i].B;
+			j++;
+		}
 	}
 
 	status = umfpack_di_triplet_to_col(par->nBlocks, par->nBlocks, 
@@ -53,7 +65,7 @@ void setTransmissibilityMatrix(Parameters *par, Block *grid, Well *wells,
 							   Boundary *boundary)
 {
  	int i, j = 0;
-	double Gamma_dt, E, EG, W, WG, N, NG, S, SG, HG, QG, Jw;
+	double Gamma_dt, E, EG, W, WG, N, NG, S, SG, A, AG, B, BG, HG, QG, Jw;
 	
 	for(i = 0; i < par->nBlocks; i++){
 		
@@ -114,14 +126,38 @@ void setTransmissibilityMatrix(Parameters *par, Block *grid, Well *wells,
 			SG = 0.0;
 		}
 
-		HG = -(EG + WG + NG + SG);
+		if(grid[i].Gzmh > 0.0){
+			A = grid[i].Gzmh*getTableVal(fprops, PRESS, 0.5*(p[i]+p[grid[i].A]), 
+				INV_FVFVISC, par->dpprops, par->nfprop);
+			AG = A*getTableVal(fprops, PRESS, 0.5*(p[i]+p[grid[i].A]), GAMMA, 
+				par->dpprops, par->nfprop);
+		}
+		else{
+			A  = 0.0;
+			AG = 0.0;
+		}
+
+		if(grid[i].Gzph > 0.0){
+			B = grid[i].Gzmh*getTableVal(fprops, PRESS, 0.5*(p[i]+p[grid[i].B]), 
+				INV_FVFVISC, par->dpprops, par->nfprop);
+			BG = B*getTableVal(fprops, PRESS, 0.5*(p[i]+p[grid[i].B]), GAMMA, 
+				par->dpprops, par->nfprop);
+		}
+		else{
+			B  = 0.0;
+			BG = 0.0;
+		}
+
+		HG = -(EG + WG + NG + SG + AG + BG);
 		QG =  EG*grid[grid[i].E].z
 			+ WG*grid[grid[i].W].z
 			+ NG*grid[grid[i].N].z
 			+ SG*grid[grid[i].S].z
+			+ AG*grid[grid[i].N].z
+			+ BG*grid[grid[i].S].z
 			+ HG*grid[i].z;
 		
-		Ax[Map[j]] = -(Gamma_dt + E + W + N + S);
+		Ax[Map[j]] = -(Gamma_dt + E + W + N + S + A + B);
 		b[i] = -(Gamma_dt*pN[i] - QG);
 
 		/* wells */
@@ -169,9 +205,17 @@ void setTransmissibilityMatrix(Parameters *par, Block *grid, Well *wells,
 				Ax[Map[j]] = S;
 				j++;
 			}
+			if(A > 0.0){
+				Ax[Map[j]] = A;
+				j++;
+			}
+			if(B > 0.0){
+				Ax[Map[j]] = B;
+				j++;
+			}
 		}
 		else  
-			setBoundaryConditions(&j, Map, Ax, &b[i], N, E, W, S, boundary, 
+			setBoundaryConditions(&j, Map, Ax, &b[i], N, E, W, S, A,B, boundary, 
 								  &grid[i]);
 	}
 
@@ -336,10 +380,11 @@ void setCylindricalTransmissibilities(Parameters *par, Block *grid, Boundary
 void setCartesianTransmissibilities(Parameters *par, Block *grid, Boundary *boundary)
 {
 	int i, j, bcIndex;
-	int bool_E, bool_W, bool_N, bool_S;
-	double dxi, dyi, dzi, kxi, kyi;
+	int bool_E, bool_W, bool_N, bool_S, bool_A, bool_B;
+	double dx, dy, dz, kx, ky, kz;
 	double dxip, dzip, kxip, dxim, dzim, kxim; 
 	double dyjp, dzjp, kyjp, dyjm, dzjm, kyjm;
+	double dzkp, kzkp, dzkm, kzkm;
 
 	setprogname("set transmissibilities");
 
@@ -347,42 +392,57 @@ void setCartesianTransmissibilities(Parameters *par, Block *grid, Boundary *boun
 	for(i = 0; i < par->nBlocks; i++){
 
 		/*********** for nonflow boundary conditions *********/
-		if(grid[i].E < 0){ 
-			if (grid[i].E != ISBONDARY)
+		if(grid[i].E < 0 || grid[i].H == grid[i].E){ 
+			if (grid[i].E != ISBOUNDARY)
 				grid[i].Gxph = NOTRANSMISSIBILITY;
 			grid[i].E = grid[i].H;			
 			par->nMatrix--;
 		}
 		
-		if(grid[i].W < 0){
-			if (grid[i].W != ISBONDARY)
+		if(grid[i].W < 0 || grid[i].H == grid[i].W){
+			if (grid[i].W != ISBOUNDARY)
 				grid[i].Gxmh = NOTRANSMISSIBILITY;
 			grid[i].W = grid[i].H;
 			par->nMatrix--;
 		}
-		
-		if(grid[i].N < 0){
-			if (grid[i].N != ISBONDARY)
+				
+		if(grid[i].N < 0 || grid[i].H == grid[i].N){
+			if (grid[i].N != ISBOUNDARY)
 				grid[i].Gyph = NOTRANSMISSIBILITY;
 			grid[i].N = grid[i].H;
 			par->nMatrix--;
 		}
-		
-		if(grid[i].S < 0){
-			if (grid[i].S != ISBONDARY)
+				
+		if(grid[i].S < 0  || grid[i].H == grid[i].S){
+			if (grid[i].S != ISBOUNDARY)
 				grid[i].Gymh = NOTRANSMISSIBILITY;
 			grid[i].S = grid[i].H;
 			par->nMatrix--;
 		}
+				
+		if(grid[i].A < 0 || grid[i].H == grid[i].A){
+			if (grid[i].A != ISBOUNDARY)
+				grid[i].Gzmh = NOTRANSMISSIBILITY;
+			grid[i].A = grid[i].H;
+			par->nMatrix--;
+		}
+				
+		if(grid[i].B < 0  || grid[i].H == grid[i].B){
+			if (grid[i].B != ISBOUNDARY)
+				grid[i].Gzph = NOTRANSMISSIBILITY;
+			grid[i].B = grid[i].H;
+			par->nMatrix--;
+		}
 		/*****************************************************/
 
-		dxi = grid[i].dx;
-		dyi = grid[i].dy;
-		dzi = grid[i].dz;
-		kxi = grid[i].kx;
-		kyi = grid[i].ky;
+		dx = grid[i].dx;
+		dy = grid[i].dy;
+		dz = grid[i].dz;
+		kx = grid[i].kx;
+		ky = grid[i].ky;
+		kz = grid[i].kz;
 
-		bool_E = bool_W = bool_N = bool_S = FALSE;
+		bool_E = bool_W = bool_N = bool_S = bool_A = bool_B = FALSE;
 
 		for(j=0; j < grid[i].nBoundary; j++){
 			bcIndex = grid[i].boundary[j];
@@ -390,6 +450,8 @@ void setCartesianTransmissibilities(Parameters *par, Block *grid, Boundary *boun
 			bool_W = boundary[bcIndex].side == WEST  ? TRUE : bool_W;
 			bool_N = boundary[bcIndex].side == NORTH ? TRUE : bool_N;
 			bool_S = boundary[bcIndex].side == SOUTH ? TRUE : bool_S;
+			bool_A = boundary[bcIndex].side == ABOVE ? TRUE : bool_A;
+			bool_B = boundary[bcIndex].side == BELOW ? TRUE : bool_B;
 		}
 		
 		if (grid[i].Gxph != NOTRANSMISSIBILITY || bool_E){
@@ -397,8 +459,8 @@ void setCartesianTransmissibilities(Parameters *par, Block *grid, Boundary *boun
 			dzip = grid[grid[i].E].dz;
 			kxip = grid[grid[i].E].kx;
 
-			grid[i].Gxph = (2.0*BETAC*dyi*dzi*dyi*dzip*kxi*kxip) 
-				/ (kxi*dyi*dzi*dxip + kxip*dyi*dzip*dxi);
+			grid[i].Gxph = (2.0*BETAC*dy*dz*dy*dzip*kx*kxip) 
+				/ (kx*dy*dz*dxip + kxip*dy*dzip*dx);
 		}
 		else{
 			grid[i].Gxph = 0.0;
@@ -410,8 +472,8 @@ void setCartesianTransmissibilities(Parameters *par, Block *grid, Boundary *boun
 			dzim = grid[grid[i].W].dz;
 			kxim = grid[grid[i].W].kx;
 
-			grid[i].Gxmh = (2.0*BETAC*dyi*dzi*dyi*dzim*kxi*kxim) 
-				/ (kxi*dyi*dzi*dxim + kxim*dyi*dzim*dxi);
+			grid[i].Gxmh = (2.0*BETAC*dy*dz*dy*dzim*kx*kxim) 
+				/ (kx*dy*dz*dxim + kxim*dy*dzim*dx);
 		}
 		else{
 			grid[i].Gxmh = 0.0;
@@ -422,29 +484,49 @@ void setCartesianTransmissibilities(Parameters *par, Block *grid, Boundary *boun
 			dzjp = grid[grid[i].N].dz;
 			kyjp = grid[grid[i].N].ky;
 
-			grid[i].Gyph = (2.0*BETAC*dxi*dzi*dxi*dzjp*kyi*kyjp) 
-				/ (kyi*dxi*dzi*dyjp + kyjp*dxi*dzjp*dyi);
+			grid[i].Gyph = (2.0*BETAC*dx*dz*dx*dzjp*ky*kyjp) 
+				/ (ky*dx*dz*dyjp + kyjp*dx*dzjp*dy);
 		}
 		else{
 			grid[i].Gyph = 0.0;
 		}
 		
 		if (grid[i].Gymh != NOTRANSMISSIBILITY || bool_S){
-				dyjm = grid[grid[i].S].dy;
-				dzjm = grid[grid[i].S].dz;
-				kyjm = grid[grid[i].S].ky; 
+			dyjm = grid[grid[i].S].dy;
+			dzjm = grid[grid[i].S].dz;
+			kyjm = grid[grid[i].S].ky; 
 
-				grid[i].Gymh = (2.0*BETAC*dxi*dzi*dxi*dzjm*kyi*kyjm)
-					/(kyi*dxi*dzi*dyjm + kyjm*dxi*dzjm*dyi);
+			grid[i].Gymh = (2.0*BETAC*dx*dz*dx*dzjm*ky*kyjm)
+				/(ky*dx*dz*dyjm + kyjm*dx*dzjm*dy);
 		}
 		else{
 			grid[i].Gymh = 0.0;
 		}
 
+		if (grid[i].Gzmh != NOTRANSMISSIBILITY || bool_A){
+			dzkm = grid[grid[i].A].dz;
+			kzkm = grid[grid[i].A].kz; 
+
+			grid[i].Gzmh = (2.0*BETAC*dx*dy*kz*kzkm)/(kz*dzkm + kzkm*dz);
+		}
+		else{
+			grid[i].Gzmh = 0.0;
+		}
+
+		if (grid[i].Gzph != NOTRANSMISSIBILITY || bool_B){
+			dzkp = grid[grid[i].B].dz;
+			kzkp = grid[grid[i].B].kz; 
+
+			grid[i].Gzph = (2.0*BETAC*dx*dy*kz*kzkp)/(kz*dzkp + kzkp*dz);
+		}
+		else{
+			grid[i].Gzph = 0.0;
+		}
+
 		if(grid[i].Gxph < 0.0 || grid[i].Gxmh < 0.0 || grid[i].Gyph < 0.0
-			|| grid[i].Gymh < 0.0){
-				weprintf("negative geometrical factor G in block (%d, %d)",
-					grid[i].row, grid[i].col);
+			|| grid[i].Gymh < 0.0 || grid[i].Gzmh < 0.0 || grid[i].Gzph < 0.0){
+				weprintf("negative geometrical factor G in block (%d, %d, %d)",
+					grid[i].row, grid[i].col, grid[i].lay);
 		}
 	}
 	/*************************************************************************/
@@ -503,6 +585,8 @@ void setInitialPressure(Parameters *par, Block *grid, Well *wells,
 					ppp[grid[i].S] =
 					ppp[grid[i].E] =
 					ppp[grid[i].W] =
+					ppp[grid[i].A] =
+					ppp[grid[i].B] =
 					ppp[grid[i].H] += dP;
 			}
 			if(wells[grid[i].isWellBlock].type == PRESSURE_ESPECIFIED){
@@ -515,6 +599,8 @@ void setInitialPressure(Parameters *par, Block *grid, Well *wells,
 					ppp[grid[i].S] =
 					ppp[grid[i].E] =
 					ppp[grid[i].W] =
+					ppp[grid[i].A] =
+					ppp[grid[i].B] =
 					ppp[grid[i].H] += dP;
 			}
 		}
@@ -528,7 +614,7 @@ void setInitialPressure(Parameters *par, Block *grid, Well *wells,
 /*****************************************************************************/
 
 
-void setWells(Parameters *par, Block *grid, int **geom, Well *wells)
+void setWells(Parameters *par, Block *grid, int ***geom, Well *wells)
 {
 	int i, localIndex;
 	double req, kH, offsetx, offsety;
@@ -537,7 +623,7 @@ void setWells(Parameters *par, Block *grid, int **geom, Well *wells)
 
 	/****** wells ******/
 	for(i = 0; i < par->nwells; i++){
-		localIndex = (geom[wells[i].row][wells[i].col] - 1);
+		localIndex = (geom[wells[i].lay][wells[i].row][wells[i].col] - 1);
 		grid[localIndex].isWellBlock = i;
 		
 		offsetx = fabs(wells[i].dx)/grid[localIndex].dx;

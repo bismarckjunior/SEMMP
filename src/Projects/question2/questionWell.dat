@@ -1,0 +1,11 @@
+[Main]
+nwells = 1;
+
+[Well 1]
+row   = 11;
+col   = 52;
+rw    = 0.25;
+s     = 0.0;
+h     = 10.0;
+type  = RATE;
+qw    = -10;

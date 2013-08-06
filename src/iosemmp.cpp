@@ -88,7 +88,7 @@ the simulation parameters structure */
 	/********* reading project name *********/
 	if (argc < 2) {
 		printf("<inifile> not specified...using default\n\n");
-		strcpy(par->projectName, "Projects/fiveSpot");
+		strcpy(par->projectName, "Projects/question2");
 		 
 	} 
 	else
@@ -119,8 +119,11 @@ the simulation parameters structure */
 	par->isCylindrical = iniparser_getboolean(ini, 
 		"reservoir description:cylindrical", FALSE); 
 	par->nSteps  = iniparser_getint(ini, "control:maxsteps", -1);
+	par->nDimensions = iniparser_getint(ini, 
+		"reservoir description:nDimensions", 3);
 	par->ncol = iniparser_getint(ini, "reservoir description:ncol", -1);
 	par->nrow = iniparser_getint(ini, "reservoir description:nrow", -1);
+	par->nlay = iniparser_getint(ini, "reservoir description:nlay", 1);
 	par->cf   = iniparser_getdouble(ini, "reservoir description:cf", -1);
 	par->cphi = iniparser_getdouble(ini, "reservoir description:cr", -1);
 	par->p0   = iniparser_getdouble(ini, "reservoir description:refpres", -1);
@@ -150,8 +153,11 @@ the simulation parameters structure */
 	str = iniparser_getstring(ini, "reservoir description:ky", NULL);
 	strcpy(par->kyFile, str);
 
+	str = iniparser_getstring(ini, "reservoir description:kz", NULL);
+	strcpy(par->kzFile, str);
+
 	str = iniparser_getstring(ini, "reservoir description:dz", NULL);
-	strcpy(par->thicknessFile, str);
+	strcpy(par->dzFile, str);
 
 	str = iniparser_getstring(ini, "reservoir description:ztop", NULL);
 	strcpy(par->zTopFile, str);
@@ -178,7 +184,7 @@ the simulation parameters structure */
 }
 /*****************************************************************************/
 
-Out *readAndSetOuts(Parameters *par, Block *grid, int **geom, char *type, 
+Out *readAndSetOuts(Parameters *par, Block *grid, int ***geom, char *type, 
 					double *cumulativeProd)
 {
 	dictionary *ini;
@@ -245,13 +251,16 @@ Out *readAndSetOuts(Parameters *par, Block *grid, int **geom, char *type,
 		sprintf(str, "%s%s", SectionName, "col");
 		outs[i].col = iniparser_getint(ini, str, -1);
 
+		sprintf(str, "%s%s", SectionName, "lay");
+		outs[i].lay = iniparser_getint(ini, str, 0);
+
 		if(outs[i].row <0 || outs[i].row >= par->nrow) 
 			eprintf("row in [%s %i] outside of reservoir geometry!", type, i+1); 
 			
 		if(outs[i].col <0 || outs[i].col >= par->ncol)
 			eprintf("col in [%s %i] outside of reservoir geometry!", type, i+1);
 
-		outs[i].localIndex = geom[outs[i].row][outs[i].col]-1;
+		outs[i].localIndex = geom[outs[i].lay][outs[i].row][outs[i].col]-1;
 
 		sprintf(str, "%s%s", SectionName, "p");
 		outs[i].p = iniparser_getboolean(ini, str, FALSE);
@@ -346,7 +355,7 @@ void readAndSetMainOut(Parameters *par, double *cumulativeProd)
 }
 /*****************************************************************************/
 
-void modifyGeometry(int **geom, Parameters *par){
+/*void modifyGeometry(int ***geom, Parameters *par){
 	FILE *mf;
 	char direction, dirFileName[LENGTHFN], type[LENBLOCKTYPE];
 	int filler, row, col, rowi=0, coli=0, rowf=0, colf=0, line=0;
@@ -420,7 +429,7 @@ void modifyGeometry(int **geom, Parameters *par){
 				break;
 		}
 
-		/*********** Exceptions **********/
+		// *********** Exceptions ********** /
 		if( rowi < 0 || rowi >= par->nrow || row < 0 ||  
 			rowf < 0 || rowf >= par->nrow || row >= par->nrow)
 			eprintf("row in line %d in \"%s\" is outside of reservoir geometry", 
@@ -429,7 +438,7 @@ void modifyGeometry(int **geom, Parameters *par){
 			colf < 0 || colf >= par->ncol || col >= par->ncol)
 			eprintf("col in line %d in \"%s\" is outside of reservoir geometry", 
 					line, par->modifiedBlocksFile);
-		/********************************/
+		// ******************************** /
 	}
 	fclose(mf);
 	unsetprogname();
@@ -437,7 +446,7 @@ void modifyGeometry(int **geom, Parameters *par){
 
 /*****************************************************************************/
 
-void modifyTransmissibilities(int **geom, Block *grid, Parameters *par){
+/*void modifyTransmissibilities(int **geom, Block *grid, Parameters *par){
 	FILE *mf;
 	char direction, dirFileName[LENGTHFN], side[LENBLOCKTYPE];
 	int localIndex, row, col, rowi=0, coli=0, rowf=0, colf=0, line=0;
@@ -581,7 +590,7 @@ void modifyTransmissibilities(int **geom, Block *grid, Parameters *par){
 				break;
 		}
 
-		/*********** Exceptions **********/
+		// *********** Exceptions ********** /
 		if( rowi < 0 || rowi >= par->nrow || row < 0 ||  
 			rowf < 0 || rowf >= par->nrow || row >= par->nrow)
 			eprintf("row in line %d in \"%s\" is outside of reservoir geometry", 
@@ -590,7 +599,7 @@ void modifyTransmissibilities(int **geom, Block *grid, Parameters *par){
 			colf < 0 || colf >= par->ncol || col >= par->ncol)
 			eprintf("col in line %d in \"%s\" is outside of reservoir geometry", 
 				line, par->modTransmissibilityFile);
-		/********************************/
+		// ******************************** /
 	}
 	fclose(mf);
 	unsetprogname();
@@ -598,12 +607,12 @@ void modifyTransmissibilities(int **geom, Block *grid, Parameters *par){
 
 /*****************************************************************************/
 
-Boundary *readAndSetBoundaryConditions(Parameters *par, int **geom, Block *grid)
+Boundary *readAndSetBoundaryConditions(Parameters *par, int ***geom, Block *grid)
 {
 	Boundary *boundary;
 	dictionary *ini;
 	int i, j, nsec, localIndex;
-	int add_col, add_row, drow, dcol, nblocks;
+	int add_col, add_row, add_lay, drow, dcol, dlay, nBlocks;
 	char num[3], SectionName[LENGTHSN];
 	char side[SIDENAME], str[LENGTHSP], type[LENBCTYPE], dirFileName[LENGTHFN];
 	
@@ -654,6 +663,9 @@ Boundary *readAndSetBoundaryConditions(Parameters *par, int **geom, Block *grid)
 
 		sprintf(str, "%s%s", SectionName, "col");
 		boundary[i].col = iniparser_getint(ini, str, -1);
+
+		sprintf(str, "%s%s", SectionName, "lay");
+		boundary[i].lay = iniparser_getint(ini, str, 0);
 
 		sprintf(str, "%s%s", SectionName, "rowf");
 		boundary[i].rowf = iniparser_getint(ini, str, boundary[i].row);
@@ -709,19 +721,23 @@ Boundary *readAndSetBoundaryConditions(Parameters *par, int **geom, Block *grid)
 				  boundary[i].rowf == boundary[i].row ? 0 : -1;
 		add_col = boundary[i].colf > boundary[i].col  ? 1 : 
 				  boundary[i].colf == boundary[i].col ? 0 : -1;
+		add_lay = boundary[i].layf > boundary[i].lay  ? 1 : 
+				  boundary[i].layf == boundary[i].lay ? 0 : -1;
 
 		drow = abs(boundary[i].rowf - boundary[i].row);
 		dcol = abs(boundary[i].colf - boundary[i].col);
+		dlay = abs(boundary[i].layf - boundary[i].lay);
 
-		if ( drow!=0 && dcol!=0 && drow!=dcol ) {
+		nBlocks = drow ? drow : dcol ? dcol : dlay ? dlay : 0;
+		
+		if ( drow != 0 && drow != nBlocks || dcol != 0 && dcol != nBlocks || 
+			 dlay != 0 && dlay != nBlocks)
 			eprintf("[Boundary %i] are not vertical, horizontal or diagonal", i+1);
-		}
-
-		nblocks = drow==dcol ? drow : abs(drow-dcol); 
-
-		for(j = 0; j <= nblocks ; j++){
+		
+		for(j = 0; j <= nBlocks ; j++){
 			localIndex = 
-				geom[boundary[i].row+add_row*j][boundary[i].col+add_col*j] - 1;
+				geom[boundary[i].lay+add_lay*j][boundary[i].row+add_row*j]
+					[boundary[i].col+add_col*j]	 - 1;
 			
 			grid[localIndex].boundary = 
 				(int*) realloc(grid[localIndex].boundary, 
@@ -730,27 +746,31 @@ Boundary *readAndSetBoundaryConditions(Parameters *par, int **geom, Block *grid)
 
 			switch(boundary[i].side){
 				case NORTH:
-					if (grid[localIndex].N != ISBONDARY){
-						grid[grid[localIndex].N].S = ISBONDARY;
-						grid[localIndex].N = ISBONDARY;
+					if (grid[localIndex].N != ISBOUNDARY){
+						if (grid[localIndex].N>0) //<<<< 
+							grid[grid[localIndex].N].S = ISBOUNDARY;
+						grid[localIndex].N = ISBOUNDARY;
 					}
 					break;
 				case SOUTH:
-					if (grid[localIndex].S != ISBONDARY){
-						grid[grid[localIndex].S].N = ISBONDARY;
-						grid[localIndex].S = ISBONDARY;
+					if (grid[localIndex].S != ISBOUNDARY){
+						if (grid[localIndex].S>0)
+							grid[grid[localIndex].S].N = ISBOUNDARY;
+						grid[localIndex].S = ISBOUNDARY;
 					}
 					break;
 				case WEST:
-					if (grid[localIndex].W != ISBONDARY){
-						grid[grid[localIndex].W].E = ISBONDARY;
-						grid[localIndex].W = ISBONDARY;
+					if (grid[localIndex].W != ISBOUNDARY){
+						if (grid[localIndex].N>0)
+							grid[grid[localIndex].N].E = ISBOUNDARY;
+						grid[localIndex].W = ISBOUNDARY;
 					}
 					break;
 				case EAST:
-					if (grid[localIndex].E != ISBONDARY){
-						grid[grid[localIndex].E].W = ISBONDARY;
-						grid[localIndex].E = ISBONDARY;
+					if (grid[localIndex].E != ISBOUNDARY){
+						if (grid[localIndex].E>0)
+							grid[grid[localIndex].E].W = ISBOUNDARY;
+						grid[localIndex].E = ISBOUNDARY;
 					}
 					break;
 					
@@ -766,14 +786,14 @@ Boundary *readAndSetBoundaryConditions(Parameters *par, int **geom, Block *grid)
 }
 /*****************************************************************************/
 
-Block *readAndSetGeometry(Parameters *par, int **geom)
+Block *readAndSetGeometry(Parameters *par, int ***geom)
 {
-	int nrow, ncol, col, row, localIndex, aux, i = 0, j = 0;
+	int nrow, ncol, nlay, col, row, lay, localIndex, aux, i = 0, j = 0;
 	int isGeoFile, isPhiFile, line = 0;
-	int isKxFile, isKyFile, isDxFile, isDyFile, isDzFile, isZtopFile;
-	double phi, kx, ky, dx, dy, dz, ztop; 
+	int isKxFile, isKyFile, isKzFile, isDxFile, isDyFile, isDzFile, isZtopFile;
+	double phi, kx, ky, kz, dx, dy, dz, ztop; 
 	double **porositytmp;
-	double **dytmp, **kxtmp, **kytmp, **thicknesstmp, **zToptmp, **dxtmp;
+	double **dytmp, **kxtmp, **kytmp, **kztmp, **dztmp, **zToptmp, **dxtmp;
 	char dirFileName[LENGTHFN];
 	Block *grid;
 	FILE *mf;	
@@ -782,6 +802,7 @@ Block *readAndSetGeometry(Parameters *par, int **geom)
 	
 	nrow = par->nrow;
 	ncol = par->ncol;
+	nlay = par->nlay;
 	par->nBlocks = 0;	
 
 	isGeoFile = (strcmp(par->geometryFile, "full") != 0); 
@@ -801,64 +822,73 @@ Block *readAndSetGeometry(Parameters *par, int **geom)
 	else {
 		phi = atof(par->porosityFile); 
 	}
+
 	if (isKxFile = !atof(par->kxFile)){
 		sprintf(dirFileName, "%s%s", par->projectDir, par->kxFile);
 		kxtmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
-	else {
+	else 
 		kx = atof(par->kxFile);
-	}
+
 	if (isKyFile = !atof(par->kyFile)){
 		sprintf(dirFileName, "%s%s", par->projectDir, par->kyFile);
 		kytmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
-	else {
+	else 
 		ky = atof(par->kyFile);
+
+	if (isKzFile = !atof(par->kzFile)){
+		sprintf(dirFileName, "%s%s", par->projectDir, par->kzFile);
+		kztmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
-	if (isDzFile = !atof(par->thicknessFile)){
-		sprintf(dirFileName, "%s%s", par->projectDir, par->thicknessFile);
-		thicknesstmp = readTableFile<double>(dirFileName, nrow, ncol);
+	else 
+		kz = atof(par->kzFile);
+
+	if (isDzFile = !atof(par->dzFile)){
+		sprintf(dirFileName, "%s%s", par->projectDir, par->dzFile);
+		dztmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
-	else {
-		dz = atof(par->thicknessFile);
-	}
+	else 
+		dz = atof(par->dzFile);
+	
 	if (isZtopFile = !atof(par->zTopFile)){
 		sprintf(dirFileName, "%s%s", par->projectDir, par->zTopFile);
 		zToptmp = readTableFile<double>(dirFileName, nrow, ncol);
 	}
-	else {
+	else 
 		ztop = atof(par->zTopFile);
-	}
+	
 	if (isDxFile = !atof(par->dxFile)){
 		sprintf(dirFileName, "%s%s", par->projectDir, par->dxFile);
 		dxtmp = readTableFile<double>(dirFileName, 1, ncol);
 	}
-	else {
+	else 
 		dx = atof(par->dxFile);
-	}
+	
 	if (isDyFile = !atof(par->dyFile)){
 		sprintf(dirFileName, "%s%s", par->projectDir, par->dyFile);
 		dytmp = readTableFile<double>(dirFileName, nrow, 1);
 	}
-	else {
+	else 
 		dy = atof(par->dyFile);
-	}
+	
 	/**************************************************/		 
 
-	if (strcmp(par->modifiedBlocksFile, UNDEF) != 0){
-		modifyGeometry(geom, par);
-		setprogname("set geometry"); 
-	}
+	//if (strcmp(par->modifiedBlocksFile, UNDEF) != 0){
+	//	modifyGeometry(geom, par);
+	//	setprogname("set geometry"); 
+	//}
 
 	aux = 1;
-	for (row = 0; row < nrow; row++) {
-		for (col = 0; col < ncol; col++) {
-		
-			if (isGeoFile) 
-				fscanf(mf, "%d", &aux);
-			if(aux > 0 && geom[row][col] != INACTIVEBLOCK) { 
-				++(par->nBlocks);
-				geom[row][col] = (par->nBlocks);
+	for (int lay = 0; lay < nlay; lay++){
+		for (row = 0; row < nrow; row++) {
+			for (col = 0; col < ncol; col++) {			
+				if (isGeoFile) 
+					fscanf(mf, "%d", &aux);
+				if(aux > 0 ){//&& geom[row][col][lay]) { 
+					++(par->nBlocks);
+					geom[lay][row][col] = (par->nBlocks);
+				}
 			}
 		}
 	}
@@ -866,7 +896,7 @@ Block *readAndSetGeometry(Parameters *par, int **geom)
 
 	/* number of non zero entries on the the matrix for the system of linear */
 	/* equations, T*p = b */  
-	par->nMatrix = par->nBlocks*5;
+	par->nMatrix = par->nBlocks*7;
 
 	/* array for the geometric properties structures */
 	grid = (Block *)calloc(par->nBlocks, sizeof(Block));
@@ -874,54 +904,72 @@ Block *readAndSetGeometry(Parameters *par, int **geom)
 	
 	
 	/* set blocks data */
-	for (row = 0; row < nrow; row++) {
-		for (col = 0; col < ncol; col++) {
-			if(geom[row][col] > 0) { 
-				localIndex = (geom[row][col] - 1);
+	for (int lay = 0; lay < nlay; lay++){
+		for (row = 0; row < nrow; row++) {
+			for (col = 0; col < ncol; col++) {
+				if(geom[lay][row][col] > 0) { 
+					localIndex = (geom[lay][row][col] - 1);
 
-				grid[localIndex].row = row;
-				grid[localIndex].col = col;
-				grid[localIndex].dx = isDxFile ? dxtmp[0][col] : dx;
-				grid[localIndex].dy = isDyFile ? dytmp[row][0] : dy;
-				grid[localIndex].dz = isDzFile ? thicknesstmp[row][col] : dz;
-				grid[localIndex].z  = (isZtopFile ? zToptmp[row][col] : ztop)
-					+ 0.5*(isDzFile ? thicknesstmp[row][col] : dz);
-				grid[localIndex].Vac = 
-					(grid[localIndex].dx) * 
-					(grid[localIndex].dy) * 
-					(grid[localIndex].dz) / ALPHAC;
-				grid[localIndex].phi = isPhiFile ? porositytmp[row][col] : phi;
-				grid[localIndex].kx = (isKxFile ? kxtmp[row][col] : kx)/1000.0; 
-				grid[localIndex].ky = (isKyFile ? kytmp[row][col] : ky)/1000.0; 
-				
-				grid[localIndex].H = localIndex;
-				grid[localIndex].E = 
-					geom[(row+nrow)%nrow][(col+ncol+1)%ncol] - 1;
-				grid[localIndex].W = 
-					geom[(row+nrow)%nrow][(col+ncol-1)%ncol] - 1;
-				grid[localIndex].N = 
-					geom[(row+nrow+1)%nrow][(col+ncol)%ncol] - 1;
-				grid[localIndex].S = 
-					geom[(row+nrow-1)%nrow][(col+ncol)%ncol] - 1;
+					grid[localIndex].H = localIndex;
+					grid[localIndex].E = 
+						geom[lay%nlay] [row%nrow][(col+1)%ncol]- 1;
+					grid[localIndex].W = 
+						geom[lay%nlay][row%nrow][(col+ncol-1)%ncol] - 1;
+					grid[localIndex].N = 
+						geom[lay%nlay][(row+1)%nrow][col%ncol] - 1;
+					grid[localIndex].S = 
+						geom[lay%nlay][(row+nrow-1)%nrow][col%ncol] - 1;
+					grid[localIndex].A = 
+						geom[(lay+nlay-1)%nlay][row%nrow][col%ncol] - 1;
+					grid[localIndex].B = 
+						geom[(lay+1)%nlay][row%nrow][col%ncol] - 1;
 
-				grid[localIndex].isWellBlock = NOWELL; 
+					grid[localIndex].row = row;
+					grid[localIndex].col = col;
+					grid[localIndex].lay = lay;
+					grid[localIndex].dx = isDxFile ? dxtmp[0][col] : dx;
+					grid[localIndex].dy = isDyFile ? dytmp[row][0] : dy;
 
-				grid[localIndex].isBoundary = NOBOUNDARY;
-				grid[localIndex].nBoundary = 0;
+					if (par->nDimensions == 2)
+						grid[localIndex].dz = isDzFile ? dztmp[row][col] : dz;
+					else
+						grid[localIndex].dz = isDzFile ? dztmp[lay][0] : dz;
+						
+					if (lay == 0)
+						grid[localIndex].z  = (isZtopFile ? zToptmp[row][col] : ztop)
+							+ 0.5*grid[localIndex].dz;
+					else
+						grid[localIndex].z  = grid[grid[localIndex].A].z 
+							+ 0.5*grid[localIndex].dz;
 
+					grid[localIndex].Vac = 
+						(grid[localIndex].dx) * 
+						(grid[localIndex].dy) * 
+						(grid[localIndex].dz) / ALPHAC;
+					grid[localIndex].phi = isPhiFile ? porositytmp[row][col] : phi;
+					grid[localIndex].kx = (isKxFile ? kxtmp[row][col] : kx)/1000.0; 
+					grid[localIndex].ky = (isKyFile ? kytmp[row][col] : ky)/1000.0; 
+					grid[localIndex].kz = (isKzFile ? kztmp[row][col] : kz)/1000.0; 
+					
+					grid[localIndex].isWellBlock = NOWELL; 
+
+					grid[localIndex].isBoundary = NOBOUNDARY;
+					grid[localIndex].nBoundary = 0;
+				}
 			}
 		}
 	}
 
-	if(strcmp(par->modTransmissibilityFile, UNDEF)!=0){
-		modifyTransmissibilities(geom, grid, par);
-		setprogname("set geometry");
-	}
+	//if(strcmp(par->modTransmissibilityFile, UNDEF)!=0){
+	//	modifyTransmissibilities(geom, grid, par);
+	//	setprogname("set geometry");
+	//}
 	
 
 	if(isKxFile)	freerMatrix(kxtmp, nrow, ncol);
 	if(isKyFile)	freerMatrix(kytmp, nrow, ncol);
-	if(isDzFile)	freerMatrix(thicknesstmp, nrow, ncol);
+	if(isKzFile)	freerMatrix(kztmp, nrow, ncol);
+	if(isDzFile)	freerMatrix(dztmp, nrow, ncol);
 	if(isDxFile)	freerMatrix(dxtmp, 1, ncol);
 	if(isDyFile)	freerMatrix(dytmp, nrow, 1);
 	if(isPhiFile)	freerMatrix(porositytmp, nrow, ncol);
@@ -1101,6 +1149,7 @@ void header(FILE *file, Parameters *par)
 	fprintf(file, "\n\n\
   nrow:                [%d]\n\
   ncol:                [%d]\n\
+  nlay:                [%d]\n\
   initialTime:         [%g]\n\
   maxSteps:            [%d]\n\
   dt:                  [%g]\n\
@@ -1112,10 +1161,10 @@ void header(FILE *file, Parameters *par)
   porosity:            [%s]\n\
   kx:                  [%s]\n\
   ky:                  [%s]\n\
-  thickness:           [%s]\n\
   zTop:                [%s]\n\
   dx:                  [%s]\n\
   dy:                  [%s]\n\
+  dz:                  [%s]\n\
   rhoSC:               [%g]\n\
   fproprows:           [%d]\n\
   dpprops:             [%g]\n\
@@ -1126,11 +1175,11 @@ void header(FILE *file, Parameters *par)
   output file:         [%s]\n\
   boundary file:       [%s]\n\n\
   ----------------------------------------------------------------------------\n", 
-		par->nrow, par->ncol, par->iniTime, par->nSteps, par->dt, par->cf, 
-		par->cphi, par->geometryFile, par->modifiedBlocksFile, 
+		par->nrow, par->ncol, par->nlay, par->iniTime, par->nSteps, par->dt, 
+		par->cf, par->cphi, par->geometryFile, par->modifiedBlocksFile, 
 		par->modTransmissibilityFile,par->porosityFile, 
-		par->kxFile, par->kyFile, par->thicknessFile, par->zTopFile, 
-		par->dxFile, par->dyFile, par->rhoSC, par->nfprop, par->dpprops, 
+		par->kxFile, par->kyFile,  par->zTopFile, par->dxFile,
+		par->dyFile, par->dzFile,par->rhoSC, par->nfprop, par->dpprops, 
 		par->fluidPropFile, par->p0, par->z0, par->wellsFile, 
 		par->outputFile, par->bcFile);
 }

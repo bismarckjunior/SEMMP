@@ -58,7 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="C:\UMFBLAS\GotoBLAS\libgoto.lib C:\UMFBLAS\AMD\Lib\libamd.lib C:\UMFBLAS\UMFPACK\Lib\libumfpack.lib C:\iniparser\Lib\iniparser.lib ws2_32.lib"
+				AdditionalDependencies="C:\UMFBLAS\GotoBLAS\libgoto.lib C:\UMFBLAS\AMD\Lib\libamd.lib C:\UMFBLAS\UMFPACK\Lib\libumfpack.lib C:\iniparser\Lib\iniparser.lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>

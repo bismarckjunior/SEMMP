@@ -8,7 +8,7 @@
 #include "block.h"
 #include "parameters.h"
 extern "C" {
-#include <iniparser.h> 
+#include <iniparser.h>
 } 
 
 
@@ -25,18 +25,19 @@ extern "C" {
 
 class Well {
 public:
-	int		row;	// row block
-	int		col;	// col block
-	int		type;	// pressure or flow rated specified
-	double	dx;		// x offset from center
-	double	dy;		// y offset from center
-	double	rw;		// wellbore radius
-	double	s;		// skin factor
-	double	h;		// height (open to flow)
-	double	gw;		// constant part of well index
-	double	qw;		// flow rate
-	double	pwf;	// bottom hole pressure
-	double  np;		// cumulative oil production
+	int		row;	///< block row
+	int		col;	///< block column
+	int		lay;	///< block layer
+	int		type;	///< pressure or flow rated specified
+	double	dx;		///< x offset from center
+	double	dy;		///< y offset from center
+	double	rw;		///< wellbore radius
+	double	s;		///< skin factor
+	double	h;		///< height (open to flow)
+	double	gw;		///< constant part of well index
+	double	qw;		///< flow rate
+	double	pwf;	///< bottom hole pressure
+	double  np;		///< cumulative oil production
 
 
 	/** 
