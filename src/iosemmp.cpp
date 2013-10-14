@@ -88,7 +88,7 @@ the simulation parameters structure */
 	/********* reading project name *********/
 	if (argc < 2) {
 		printf("<inifile> not specified...using default\n\n");
-		strcpy(par->projectName, "Projects/question2");
+		strcpy(par->projectName, "Projects/fraturado");
 		 
 	} 
 	else
@@ -153,8 +153,8 @@ the simulation parameters structure */
 	str = iniparser_getstring(ini, "reservoir description:ky", NULL);
 	strcpy(par->kyFile, str);
 
-	str = iniparser_getstring(ini, "reservoir description:kz", NULL);
-	strcpy(par->kzFile, str);
+	//str = iniparser_getstring(ini, "reservoir description:kz", NULL);
+	//strcpy(par->kzFile, str);
 
 	str = iniparser_getstring(ini, "reservoir description:dz", NULL);
 	strcpy(par->dzFile, str);

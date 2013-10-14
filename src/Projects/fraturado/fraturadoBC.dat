@@ -1,0 +1,31 @@
+[Main]
+nboundary = 3;
+
+[Boundary 1]
+row = 0;
+col = 0;
+rowf = 0;
+colf = 99;
+type = RATE;
+side = south;
+value = 0;
+
+[Boundary 2]
+row = 0;
+col = 0;
+rowf = 9;
+colf = 0;
+type = RATE;
+side = west;
+value = 0.1;
+
+[Boundary 3]
+row = 10;
+col = 0;
+rowf = 24;
+colf = 0;
+type = RATE;
+side = west;
+value = 0;
+
+
