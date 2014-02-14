@@ -88,10 +88,7 @@ int main (int argc, char *argv[])
 
 	freeiMatrix(geom, par.nrow, par.ncol);
 
-	if (par.isCylindrical) //0.0.3
-		setCylindricalTransmissibilities(&par, grid, boundary, wells);
-	else
-		setCartesianTransmissibilities(&par, grid, boundary); 
+	setCartesianTransmissibilities(&par, grid, boundary); 
 	
 	fprops = readFluidProperties(&par);
 
@@ -179,17 +176,6 @@ int main (int argc, char *argv[])
 		}
 		while(delta > EPSILON);
 		
-		/*IMB
-		if (par.nwells == 0){
-			IMB = 0;
-			cumulativeProd = 1;
-			for (i=0; i<par.nBlocks; i++){
-				IMB += grid[i].Vac*grid[i].phi*(
-					getTableVal(fprops, PRESS, pressureNp1[i], INV_FVFVISC, par.dpprops, par.nfprop)
-					-getTableVal(fprops, PRESS, pressureN[i], INV_FVFVISC, par.dpprops, par.nfprop));
-			}
-		}//*/
-
 		ptmp = pressureN;
 		pressureN = pressureNp1;
 		pressureNp1 = ptmp;
@@ -698,160 +684,6 @@ void setCartesianTransmissibilities(Parameters *par, Block *grid, Boundary *boun
 }
 /*****************************************************************************/
 
-void setCylindricalTransmissibilities(Parameters *par, Block *grid, Boundary 
-								 *boundary, Well *wells)
-{
-	int i, j, n, bcIndex;
-	int bool_E, bool_W, bool_N, bool_S;
-	double dri, ri, rim, rip, rimh, riph, kri, krip, krim;
-	double doj, dojm, dojp, koj, kojp, kojm,dz,dzip,dzim,dzjp,dzjm;
-	double **drtmp, *r, *rh;
-	char drFileName[LENGTHFN];
-
-	setprogname("set cylindrical transmissibilities");
-
-	/*
-	 _ _ _ _ _______       _______       _______ _ _ _ _ 
-	|       |       | ... |       | ... |       |       |
-	| r[0]  |  r[1] | ... |  r[i] | ... |  r[n] | r[n+1]|
-	|_ _ _ _|_______| ... |_______| ... |_______|_ _ _ _|
-	        |             |       |             | 
-	      rh[0]        rh[i-1]  rh[i]         rh[n]   
-	*/
-
-	/* half-block radius *///0.0.3
-	if (!atof(par->dxFile)){
-		drtmp = rMatrix(1, par->ncol);
-		sprintf(drFileName, "%s%s", par->projectDir, par->dxFile);
-		rTableFile(drFileName, drtmp, 1, par->ncol);
-	}
-	else printf("Error!");
-
-	n = par->ncol-1; //Depende se tem uma coluna de zeros!!! <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	r  = rVector(n + 2);	
-	rh = rVector(n + 1); 
-	rh[0] = wells[0].rw;
-	for (i=0; i < n; i++){
-		rh[i+1] = rh[i] + drtmp[0][i];
-		r[i+1]  = sqrt(rh[i]*rh[i+1]);		
-	}
-
-	/* boundary-block radius *///r12 = (r2 - r1) / log(r2/r1)
-	r[0] = rh[0];
-	while(abs(r[0]-r[1]*exp((r[0]-r[1])/rh[0])) > EPSILON){
-		r[0] = r[1]*exp((r[0]-r[1])/rh[0]);
-	}
-	r[0] = r[1]*exp((r[0]-r[1])/rh[0]);
-	r[n+1] = rh[n];
-	while(abs(r[n+1]-r[n]-rh[n]*log(r[n+1]/r[n])) > EPSILON){
-		r[n+1] = r[n] + rh[n]*log(r[n+1]/r[n]);
-	}
-	r[n+1] = r[n] + rh[n]*log(r[n+1]/r[n]);
-	/****** constant part of the transmissibilities ******/
-	for(i = 0; i < par->nBlocks; i++){
-
-		/*********** for nonflow boundary conditions *********/
-		if(grid[i].E < 0){ 
-			grid[i].E = grid[i].H;
-		}
-		
-		if(grid[i].W < 0){
-			grid[i].W = grid[i].H;
-		}
-		
-		if(grid[i].N < 0){
-			grid[i].N = grid[i].H;
-		}
-		
-		if(grid[i].S < 0){
-			grid[i].S = grid[i].H;
-		}
-		/*****************************************************/
-		
-		bool_E = bool_W = FALSE;
-
-		for(j=0; j < grid[i].nBoundary; j++){
-			bcIndex = grid[i].boundary[j];
-			bool_E = boundary[bcIndex].side == EAST ? TRUE : bool_E;
-			bool_W = boundary[bcIndex].side == WEST ? TRUE : bool_W;
-		}
-
-		n   = grid[i].col+1;
-		ri  = r[n];
-		dz  = grid[i].dz;
-		dri = rh[n]-rh[n-1];
-		doj = grid[i].dy;
-		kri	= grid[i].kx;
-		koj = grid[i].ky;
-		riph = rh[n];
-		rimh = rh[n-1];
-		
-		if (grid[i].Gxph < 0 ){
-			if( grid[i].E != grid[i].H || bool_E == TRUE){ 
-				rip = r[n+1];
-				dzip = grid[grid[i].E].dz;
-				krip = grid[grid[i].E].kx;
-				
-				grid[i].Gxph =	  BETAC*doj*(kri*krip*dz*dzip) / 
-						 ( krip*dzip*log(riph/ri) + kri*dz*log(rip/riph) );
-			}
-			else{
-				grid[i].Gxph = 0.0;
-			}
-		}
-		
-		if (grid[i].Gxmh < 0 ){
-			if( grid[i].W != grid[i].H || bool_W == TRUE){ 
-				rim = r[n-1]; 
-				dzim = grid[grid[i].E].dz;
-				krim = grid[grid[i].W].kx;
-				
-				grid[i].Gxmh = -BETAC*doj*(kri*krim*dz*dzim) / 
-						 ( krim*dzim*log(rimh/ri) + kri*dz*log(rim/rimh) );
-			}
-			else{
-				grid[i].Gxmh = 0.0;
-			}
-		}
-		
-		if (grid[i].Gyph < 0 ){
-			if( grid[i].N != grid[i].H ){ 
-				dojp = grid[grid[i].N].dy;
-				dzjp = grid[grid[i].N].dz;
-				kojp = grid[grid[i].N].ky;
-				grid[i].Gyph = BETAC*dri/ri*(2*doj*dojp)/(doj*kojp*dzjp + dojp*koj*dz);
-			}
-			else{
-				grid[i].Gyph = 0.0;
-			}
-		}
-		
-		if (grid[i].Gymh < 0 ){
-			if( grid[i].S != grid[i].H ){
-				dojm = grid[grid[i].S].dy;
-				dzjm = grid[grid[i].S].dz;
-				kojm = grid[grid[i].S].ky;
-				grid[i].Gymh = BETAC*dri/ri*(2*doj*dojm)/(doj*kojm*dzjm + dojm*koj*dz);
-			}
-			else{
-				grid[i].Gymh = 0.0;
-			}
-		}
-		
-		if(grid[i].Gxph < 0.0 || grid[i].Gxmh < 0.0 || grid[i].Gyph < 0.0
-			|| grid[i].Gymh < 0.0){
-				weprintf("negative geometrical factor G in block (%d, %d)",
-					grid[i].row, grid[i].col);
-		}
-	}
-	/*************************************************************************/
-
-	unsetprogname();
-
-	return;
-}
-/*****************************************************************************/
-
 double **readFluidProperties(Parameters *par)
 /* read the fluid properties from a file (pressure, Formation Volume Factor, 
 /* viscosity, especific gravity) and stores p, 1/FVF, 1/(FVF*mu) and gamma */
@@ -909,12 +741,6 @@ void setInitialPressure(Parameters *par, Block *grid, Well *wells,
 		}
 		delta = normDelta(p, pp, par->nBlocks);
 	}while(delta > EPSILON);
-
-	if (par->cf == 0.0){
-		for(i = 0; i < par->nBlocks; i++) ppp[i] = pp[i] = p[i]=7750;
-		unsetprogname();
-		return;
-	}
 
 	/************* gross estimative of the first pressure change *************/
 	for(i = 0; i < par->nBlocks; i++){
